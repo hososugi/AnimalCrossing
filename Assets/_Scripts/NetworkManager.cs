@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
 using TMPro;
 using UnityEngine.UI;
 
-public class ConnectToServer : MonoBehaviourPunCallbacks
+public class NetworkManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_Text textServerConnection;
     [SerializeField] TMP_InputField inputFieldRoomCode;
@@ -33,8 +34,13 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
     {
         base.OnConnectedToMaster();
         textServerConnection.text = "Joining lobby";
-
         PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        base.OnDisconnected(cause);
+        textServerConnection.text = $"Disconnected from master: {cause}";
     }
 
     public override void OnJoinedLobby()
@@ -44,7 +50,7 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
         connectionImage.sprite = connectedSprite;
         connectionImage.color = connectedColor;
 
-        this.CreateRoom();
+        //this.CreateRoom();
     }
 
     public void CreateRoom()
@@ -57,15 +63,30 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
             
     }
 
+    public void JoinRoom()
+    {
+        if(!string.IsNullOrEmpty(inputFieldRoomCode.text))
+        {
+            textServerConnection.text = $"Joining room ({inputFieldRoomCode.text})";
+            PhotonNetwork.JoinRoom(inputFieldRoomCode.text);
+        }
+    }
+
+    public override void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+        textServerConnection.text = $"Joined room ({inputFieldRoomCode.text})";
+    }
+
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         base.OnCreateRoomFailed(returnCode, message);
         textServerConnection.text = $"Failed to create room ({inputFieldRoomCode.text})";
     }
 
-    public override void OnJoinedRoom()
+    public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        base.OnJoinedRoom();
-        textServerConnection.text = $"Created room ({inputFieldRoomCode.text})";
+        base.OnJoinRoomFailed(returnCode, message);
+        textServerConnection.text = $"Failed to create room. {returnCode} with message {message}";
     }
 }

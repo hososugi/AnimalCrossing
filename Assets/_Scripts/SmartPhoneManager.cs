@@ -10,6 +10,7 @@ public class SmartPhoneManager : MonoBehaviour
     static string timeFormat24Hour = "H:mm";
     string timeString;
 
+    [SerializeField] NetworkManager networkManager;
     [SerializeField] GameObject window;
     [SerializeField] public bool isVisible;
     [SerializeField] public bool isAnimating;
@@ -54,7 +55,12 @@ public class SmartPhoneManager : MonoBehaviour
 
     public void HostButtonClick()
     {
+        networkManager.CreateRoom();
+    }
 
+    public void JoinButtonClick()
+    {
+        networkManager.JoinRoom();
     }
 
     IEnumerator LerpSmartPhoneWindow(Vector3 targetScale)
